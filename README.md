@@ -132,4 +132,4 @@ Word4: 0.1
 4. In every step, select the top B words and evaluate all possible next words for each of them to maintain the top B most probable sentences.
 
 ---
-
+ 
