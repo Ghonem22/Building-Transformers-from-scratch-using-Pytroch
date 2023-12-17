@@ -31,6 +31,10 @@ class PositionalEncoding(nn.Module):
 
     The positional encoding is added element-wise to the input embeddings
 
+    It gives an indication when handle tokens that they are close ot distant from each other using mathematical formula
+    So It's Calculated, not learned through training the model
+
+    - We will calculate the full matrix for maximum seq_len, then we will take partion from it according to the sentence length
     Args:
         d_model: the dimension of the embedding  >> 512
         seq_len: The max length of the sentence
