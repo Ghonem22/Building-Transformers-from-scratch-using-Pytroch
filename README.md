@@ -25,6 +25,10 @@ Self-attention provides a new embedding with the same shape as the input embeddi
 
 Note: h * d_v should equal d_model if d_v = d_k.
 
+
+![multi-head-attention-archtictre.png](images%2Fmulti-head-attention-archtictre.png)
+
+
 ### Layer Normalization (Add & Norm)
 
 - There's a connection that takes a copy from positional encoding and directly feeds it into the Add & Norm layer.
