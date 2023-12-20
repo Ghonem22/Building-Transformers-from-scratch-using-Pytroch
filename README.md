@@ -33,7 +33,7 @@ Note: h * d_v should equal d_model if d_v = d_k.
 
 - Replace each value in the vector with a normalized value using the mean and variance: X` = (X - mean) / (sqrt(variance - beta)).
 
-- We have trainable parameters, beta and gamma.
+- We have trainable parameters, beta and gamma. This make the freedom to the model to amplify some values
 
 Then there are two steps:
 

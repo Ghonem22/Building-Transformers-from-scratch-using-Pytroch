@@ -77,3 +77,29 @@ class PositionalEncoding(nn.Module):
 
         x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) # (batch, seq_len, d_model)
         return self.dropout(x)
+
+class LayerNormalization(nn.Module):
+    def __init__(self, eps: float = 10 ** -6):
+        super().__init__()
+
+        # We need eps to prevent X` to become inf if variance = 0  >>> Give us numerical Stability
+        self.eps = eps
+
+        # We will use alpha and gamma parameters which are trainable
+        self.alpha = nn.Parameter(torch.ones(1))    # we will use alpha in multiplication, that's why it's 1
+        self.bias = nn.Parameter(torch.ones(0))    # we will add bias, that's why it's 0
+
+
+    def forward(self, x):
+
+        # dim=-1: Calculate the mean along the last dimension of the input tensor.
+        # keepdim=True: To prevent that the dimension along which the mean is calculated is removed
+        mean = x.mean(dim = -1, keepdim = True)
+        std = x.std(dim = -1, keepdim = True)
+
+
+        # calc variance of x
+        # x = (x - mean) / nn.sqrt(variance + self.eps)
+
+
+        return self.alpha * (x - mean) / (std + self.eps) + self.bias
