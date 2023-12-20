@@ -103,3 +103,31 @@ class LayerNormalization(nn.Module):
 
 
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
+
+class FeedForwardBlock(nn.Module):
+    """
+    Basically it's a fully connected layer
+
+    According to the paper, we have to linear layer
+    linear1: map from d_model = 512 to Dff = 2048
+    linear2: map from d_ff = 2048 to d_model = 512
+
+
+    Arg:
+
+    Returns:
+
+    """
+
+    def __init__(self, d_model, d_ff, dropout: float):
+        super().__init__()
+        self.linear1 = nn.Linear(d_model, d_ff)  # w1 and b1
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(d_ff, d_model) # w2 and b2
+
+    def forward(self,x):
+        x = self.linear1(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        return self.linear2(x)
