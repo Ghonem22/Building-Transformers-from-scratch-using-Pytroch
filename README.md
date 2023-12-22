@@ -3,6 +3,13 @@
 
 This repository provides an overview of building a transformer model from scratch. Transformers are a popular architecture for various natural language processing tasks, including machine translation.
 
+
+
+## Transformers Architecture
+
+![Transformers.png](images%2FTransformers.png)
+
+
 ## Encoder
 
 ### Self-Attention
