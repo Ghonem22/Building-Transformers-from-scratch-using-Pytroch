@@ -213,3 +213,33 @@ class ResidualConnection(nn.Module):
 
     def forward(self, x, sublayer):
         return x + self.dropout(sublayer(self.norm(x)))
+    
+class EncoderBlock(nn.Module):
+    """
+    In Encoder, MultiHeadAttention is considered as self attention as we get the relation between each token in the sentence and other tokens in same sentence
+    """
+    def __init__(self, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float):
+        super().__init__()
+        self.self_attention_block = self_attention_block
+        self.feed_forward_block = feed_forward_block
+        self.dropout = nn.Dropout(dropout)
+        self.residual_connections = nn.ModuleList(ResidualConnection(dropout) for _ in range(2))  # ModuleList is used to organize list of layers
+
+    def forward(self, x, mask):
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x,x,x, mask))  # we have to use lambda as we pass a function to residual_connections
+        return self.residual_connections[1](x, self.feed_forward_block)
+
+
+
+class Encoder(nn.Module):
+    def __init__(self, layers: nn.ModuleList):
+        super().__init__()
+        self.layers = layers
+        self.norm = LayerNormalization
+
+    def forward(self, x, mask):
+        for layer in self.layers:
+            x = layer(x, mask)
+
+        return self.norm(x)
+
