@@ -222,11 +222,10 @@ class EncoderBlock(nn.Module):
         super().__init__()
         self.self_attention_block = self_attention_block
         self.feed_forward_block = feed_forward_block
-        self.dropout = nn.Dropout(dropout)
         self.residual_connections = nn.ModuleList(ResidualConnection(dropout) for _ in range(2))  # ModuleList is used to organize list of layers
 
-    def forward(self, x, mask):
-        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x,x,x, mask))  # we have to use lambda as we pass a function to residual_connections
+    def forward(self, x, src_mask):
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x,x,x, src_mask))  # we have to use lambda as we pass a function to residual_connections
         return self.residual_connections[1](x, self.feed_forward_block)
 
 
@@ -240,6 +239,34 @@ class Encoder(nn.Module):
     def forward(self, x, mask):
         for layer in self.layers:
             x = layer(x, mask)
+
+        return self.norm(x)
+
+class DecoderBlock(nn.Module):
+    """
+    MultiHeadAttentionBlock used as self_attention and cross_attention depending on the input
+    """
+    def __init__(self, self_attention_block: MultiHeadAttentionBlock, cross_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float):
+        super().__init__()
+        self.self_attention_block = self_attention_block
+        self.cross_attention_block = cross_attention_block
+        self.feed_forward_block = feed_forward_block
+        self.residual_connections = nn.ModuleList(ResidualConnection(dropout) for _ in range(3))  # ModuleList is used to organize list of layers
+
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x,x,x, tgt_mask))  # we have to use lambda as we pass a function to residual_connections
+        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output,encoder_output, src_mask))  # Query from Decoder, while key and value from encoder
+        return self.residual_connections[2](x, self.feed_forward_block)
+
+class Decoder(nn.Module):
+    def __init__(self, layers: nn.ModuleList):
+        super().__init__()
+        self.layers = layers
+        self.norm = LayerNormalization
+
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+        for layer in self.layers:
+            x = layer(x, encoder_output, src_mask, tgt_mask)
 
         return self.norm(x)
 
